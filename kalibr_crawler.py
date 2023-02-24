@@ -4,7 +4,7 @@ from tenacity import retry, wait_fixed
 
 @retry(wait=wait_fixed(300))
 def crawler(item):
-    url = f'https://jobseeker.kalibrr.com/kjs/job_board/search?limit=15&location=Bekasi&location=Bogor&location=Dki+Jakarta&location=Tangerang&offset={15*item}'
+    url = f'd'
     header = {
         "accept": "application/json, text/plain, */*",    
         "accept-language": "en-US,en;q=0.9",
@@ -34,7 +34,7 @@ def main(lower_limit, upper_limit):
     name_list    = []
     address_list = []
     city_list    = []
-    for page in range(lower_limit-1, upper_limit):
+    for page in range(lower_limit-1, upper_limit+1):
         print(f"Currently on page: {page}")
         get_dict = crawler(page)
         for item in get_dict["jobs"]:
@@ -53,7 +53,8 @@ def main(lower_limit, upper_limit):
             
         
         df = pd.DataFrame(list(zip(name_list,address_list,city_list)),columns=['Company Name','Adress','City'])
-        df.drop_duplicates()
+        df = df.drop_duplicates(subset=['Company Name'])
+        df = df.drop_duplicates(subset=['Adress'])
         print(f"Page {page} is done")
         df.to_excel("kalibrr.xlsx")
 
